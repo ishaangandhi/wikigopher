@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/tidwall/gjson"
 )
 
 const (
@@ -12,10 +14,48 @@ const (
 	searchResultsCap = 10
 )
 
-// Page represents a Wikipedia Page
-type Page struct {
-	PageID uint64 `json:"pageid"`
-	Title  string `json:"title"`
+// WikipediaPage represents a Wikipedia Page
+type WikipediaPage struct {
+	PageID     uint64
+	Title      string
+	Content    string
+	Categories []string
+	Links      []string
+}
+
+// Page returns the WikipediaPage object for a given search query
+func Page(query string) (*WikipediaPage, error) {
+	// first run Search() to get most relevant result for query
+	var searchResults = Search(query)
+	v := url.Values{
+		"titles":      []string{searchResults[0]},
+		"action":      []string{"query"},
+		"prop":        []string{"categories|extracts|revisions|links"},
+		"rvprop":      []string{"ids"},
+		"format":      []string{"json"},
+		"explaintext": []string{""},
+	}
+
+	var page WikipediaPage
+	respJSON, err := wikiRequest(v)
+	if err != nil {
+		return &page, err
+	}
+
+	pageJSON := gjson.GetBytes(respJSON, "query.pages.*")
+	page.PageID = pageJSON.Get("pageid").Uint()
+	page.Title = pageJSON.Get("title").String()
+	page.Content = pageJSON.Get("extract").String()
+	pageLinks := pageJSON.Get("links.#.title").Array()
+	for _, link := range pageLinks {
+		page.Links = append(page.Links, link.String())
+	}
+	pageCategories := pageJSON.Get("categories.#.title").Array()
+	for _, category := range pageCategories {
+		page.Categories = append(page.Categories, category.String())
+	}
+
+	return &page, nil
 }
 
 // Summary returns the Wikipedia summary for a given search query
@@ -60,6 +100,11 @@ func Search(query string) []string {
 		"action":   []string{"query"},
 		"srsearch": []string{query},
 		"format":   []string{"json"},
+	}
+
+	type Page struct {
+		PageID uint64 `json:"pageid"`
+		Title  string `json:"title"`
 	}
 
 	type SearchResult struct {

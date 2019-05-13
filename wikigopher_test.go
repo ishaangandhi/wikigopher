@@ -1,12 +1,29 @@
 package wikigopher_test
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/ishaangandhi/wikigopher"
 )
+
+func TestPage(t *testing.T) {
+	cases := []struct {
+		query, title string
+		pageid       uint64
+	}{
+		{"nyc", "New York City", 645042},
+	}
+	for _, c := range cases {
+		got, err := wikigopher.Page(c.query)
+		if err != nil {
+			t.Errorf("Page errored with query %q and err %q", c.query, err)
+		}
+		if got.PageID != c.pageid {
+			t.Errorf("Page failed with query %q and page id %d", c.query, got.PageID)
+		}
+	}
+}
 
 func TestSummary(t *testing.T) {
 	cases := []struct {
@@ -30,9 +47,6 @@ func TestSearch(t *testing.T) {
 	}{
 		{"wikipedia", []string{"Wikipedia"}},
 	}
-	var summary string
-	summary = wikigopher.Summary("golang")
-	fmt.Println(summary)
 	for _, c := range cases {
 		got := wikigopher.Search(c.query)
 		if got[0] != c.search[0] {
