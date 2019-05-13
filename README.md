@@ -9,7 +9,7 @@ Inspired by the Wikipedia wrapper for Python (https://github.com/goldsmith/Wikip
 
 Start using wikipedia for Go in less than 5 minutes!
 
-Begin by installing wikigopher::
+Begin by installing wikigopher:
 
 	$ go get github.com/Ishaangandhi/wikigopher
 
