@@ -3,6 +3,8 @@ A wrapper around Wikipedia's API for Golang
 
 Inspired by the Wikipedia wrapper for Python (https://github.com/goldsmith/Wikipedia)
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/ishaangandhi/wikigopher)](https://goreportcard.com/report/github.com/ishaangandhi/wikigopher)
+
 **********
 
 Start using wikipedia for Go in less than 5 minutes!
